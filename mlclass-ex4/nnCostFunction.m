@@ -62,30 +62,66 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
+X = [ones(m, 1) X];
+z2 = X * Theta1';
+a2 = sigmoid(z2);
+a2 = [ones(m, 1) a2];
+z3 = a2 * Theta2';
+h = sigmoid(z3)';
 
+% Make output y with digit numbers to yk — [1, 10] vector with 0 everywhere except digit number -- 1
+yk = zeros(num_labels, m); 
+for i=1:m,
+  yk(y(i),i)=1;
+end
 
+% Creating Thetatemp for regularization
+Theta_temp1 = Theta1;
+Theta_temp2 = Theta2;
+Theta_temp1(:, 1) = 0;
+Theta_temp2(:, 1) = 0;
 
+% Finally computing cost function
+J = (1 / m) * sum(sum(-yk .* log(h) - (1 - yk) .* log(1 - h))) + lambda/(2*m)*(sum(sum(Theta_temp1 .^ 2)) + sum(sum(Theta_temp2 .^ 2)));
 
+% Backpropogation algorithm code is below
 
+for t = 1 : m,
+	x = X(t, :);
+	z2 = x * Theta1';
+	a2 = sigmoid(z2);
+	a2 = [1 a2];
+	z3 = a2 * Theta2';
+	a3 = sigmoid(z3);
 
+	% Check that a3, a2, z3, z2 are vectors
+	a3 = a3(:); 
+	a2 = a2(:);
+	a1 = x(:);
+	z3 = z3(:);
+	z2 = [1; z2(:)];	
 
+	y = yk(:, t);
+	delta3 = a3 - y;
+	delta2 = (Theta2' * delta3) .* sigmoidGradient(z2);
+	delta2 = delta2(2:end);
 
+	Theta2_grad = Theta2_grad + delta3 * a2';
+	Theta1_grad = Theta1_grad + delta2 * a1';
+end;
 
+%Theta1_grad = Theta1_grad ./ m;
+%Theta2_grad = Theta2_grad ./ m;
 
-
-
-
-
-
-
-
-
-% -------------------------------------------------------------
-
-% =========================================================================
+% Regularization for Thata_grad
+Theta1_grad(:, 1) = Theta1_grad(:, 1) ./ m;      
+Theta1_grad(:, 2:end) = Theta1_grad(:, 2:end) ./ m + ((lambda/m) * Theta1(:, 2:end));
+Theta2_grad(:, 1) = Theta2_grad(:, 1) ./ m;
+Theta2_grad(:, 2:end) = Theta2_grad(:, 2:end) ./ m + ((lambda/m) * Theta2(:, 2:end));
 
 % Unroll gradients
 grad = [Theta1_grad(:) ; Theta2_grad(:)];
 
+% =========================================================
 
 end
