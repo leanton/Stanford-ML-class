@@ -23,11 +23,25 @@ sigma = 0.3;
 %        mean(double(predictions ~= yval))
 %
 
+% Algorithm is to look over all suggested values of C and sigma
+% Than train each example and write error on validation set values to matrix error_val
+% Than find indeces of smallest element in this matrix
+suggested_values = [0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30]
+error_val  = zeros(length(suggested_values), length(suggested_values));
+for i=1:length(suggested_values)
+	for j=1:length(suggested_values)
+		C_var = suggested_values(i);
+		sigma_var = suggested_values(j);
+		model = svmTrain(X, y, C_var, @(x1, x2) gaussianKernel(x1, x2, sigma_var));
+		predictions = svmPredict(model, Xval);
+		error_val(i, j) = mean(double(predictions ~= yval));
+	end
+end
 
-
-
-
-
+[minval,ind] = min(error_val(:));
+[I,J] = ind2sub([size(error_val,1) size(error_val,2)],ind);
+C = suggested_values(I);
+sigma = suggested_values(J);
 
 % =========================================================================
 
