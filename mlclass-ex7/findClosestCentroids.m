@@ -20,10 +20,15 @@ idx = zeros(size(X,1), 1);
 %
 % Note: You can use a for-loop over the examples to compute this.
 %
+m = size(X, 1);
+distances = [];
+for i = 1:K
+	mu = repmat(centroids(i, :), m, 1);
+	dist = sum((X - mu) .^ 2, 2);
+	distances = [distances, dist];
+end
 
-
-
-
+[values, idx] = min(distances,[],2);
 
 
 
